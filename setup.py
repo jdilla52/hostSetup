@@ -12,7 +12,7 @@ with io.open("src/host_setup/__init__.py", "rt", encoding="utf8") as f:
     print(version)
 
 setup(
-    name="host setup",
+    name="host_setup",
     version=version,
     author="Jacques Perrault",
     packages=find_packages(where="src"),
