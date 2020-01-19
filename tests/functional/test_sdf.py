@@ -1,6 +1,10 @@
 import os 
+from host_setup.actions import find_downloads
+import pytest
 
-# content of test_class.py
-def test_setup(test_data_dir):
-    print(test_data_dir)
+
+def test_find_downloads(test_data_dir):
+    path = os.path.join(test_data_dir, "downloads/")
+    print(path)
+    find_downloads(path)
     assert test_data_dir
