@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+import os
 
 DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     id integer PRIMARY KEY,
@@ -126,3 +127,11 @@ class DataB:
         cur = self.conn.cursor()
         cur.execute(sql)
         self.conn.commit()
+
+    def delete_database(self):
+        """
+        Delete the base .db file
+        :return:
+        """
+        self.conn.close()
+        os.remove(self.path)

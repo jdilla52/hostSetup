@@ -54,14 +54,12 @@ def test_update_task(test_data_dir):
     db = DataB(path)
     task_data = ("bbb", 0, 2, "2015-01-01", "2015-01-02", 0)
     db.update_task(task_data)
-    # print(f"tasks by priority {tasks}")
 
 
 def test_update_param(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
     db.update_task_param("status_id", 2, 0)
-    # print(f"tasks by priority {tasks}")
 
 
 def test_delete_task(test_data_dir):
@@ -75,3 +73,10 @@ def test_delete_all_task(test_data_dir):
     db = DataB(path)
     db.delete_all_tasks()
     assert len(db.select_all_tasks()) == 0
+
+
+def test_delete_db(test_data_dir):
+    path = os.path.join(test_data_dir, "output/db.db")
+    db = DataB(path)
+    db.delete_database()
+    assert not os.path.exists(path)
