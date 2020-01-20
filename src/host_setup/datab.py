@@ -1,6 +1,8 @@
 import sqlite3
 from sqlite3 import Error
 import os
+from datetime import datetime
+
 
 DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     id integer PRIMARY KEY,
@@ -32,6 +34,11 @@ class DataB:
 
         return conn
 
+    @property
+    def get_start_time(self):
+        # datetime object containing current date and time
+        return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
     def commit_changes(self):
         self.conn.commit()
 
@@ -44,6 +51,17 @@ class DataB:
             c.execute(DATAB_DEF)
         except Error as e:
             print(e)
+
+    def create_new_task(self, name, priority=0, status_id=0):
+        """
+        Create a new task for tracking. this is a helper around _create_task
+        :param name : str
+        :param priority : int
+        :param status_id : int
+        :return: id : int
+        """
+        task = (name, priority, status_id, self.get_start_time, "-")
+        self.create_task(task)
 
     def create_task(self, task):
         """
