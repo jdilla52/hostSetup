@@ -10,25 +10,30 @@ DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     end_date text NOT NULL
                                 );"""
 
+
 class DataB:
-    def __init__ (self, db_file):
+    def __init__(self, db_file):
+        self.path = db_file
         self.conn = self.create_connection(db_file)
 
-    def create_connection(self, db_file):
+    @staticmethod
+    def create_connection(db_file):
         """ create a database connection to the SQLite database
-            specified by db_file
+         specified by the db_file
         :param db_file: database file
         :return: Connection object or None
         """
         conn = None
         try:
             conn = sqlite3.connect(db_file)
-            return conn
         except Error as e:
             print(e)
+
         return conn
-    
-    
+
+    def commit_changes(self):
+        self.conn.commit()
+
     def create_new_table(self):
         """ create a table from the create_table_sql statement
         :return:
@@ -45,9 +50,9 @@ class DataB:
         :param task:
         :return:
         """
-    
-        sql = ''' INSERT INTO tasks(name,priority,status_id,begin_date,end_date)
-                VALUES(?,?,?,?,?) '''
+
+        sql = """ INSERT INTO tasks(name,priority,status_id,begin_date,end_date)
+                VALUES(?,?,?,?,?) """
         cur = self.conn.cursor()
         cur.execute(sql, task)
         return cur.lastrowid
@@ -56,37 +61,28 @@ class DataB:
         """
         update priority, begin_date, and end date of a task
         :param task:
-        :return: project id
         """
-        sql = ''' UPDATE tasks
-                SET priority = ? ,
+        sql = """ UPDATE tasks
+                SET name = ? ,
+                    priority = ? ,
+                    status_id = ? ,
                     begin_date = ? ,
                     end_date = ?
-                WHERE id = ?'''
+                WHERE id = ?"""
         cur = self.conn.cursor()
         cur.execute(sql, task)
         self.conn.commit()
 
-    def delete_task(self, id):
+    def update_task_param(self, param, val, task_id):
         """
-        Delete a task by task id
-        :param id: id of the task
-        :return:
+        update priority, begin_date, and end date of a task
+        :param task:
         """
-        sql = 'DELETE FROM tasks WHERE id=?'
+        sql = f""" UPDATE tasks
+                SET {param} = ?
+                WHERE id = ?"""
         cur = self.conn.cursor()
-        cur.execute(sql, (id,))
-        self.conn.commit()
-    
-    
-    def delete_all_tasks(self):
-        """
-        Delete all rows in the tasks table
-        :return:
-        """
-        sql = 'DELETE FROM tasks'
-        cur = self.conn.cursor()
-        cur.execute(sql)
+        cur.execute(sql, (val, task_id))
         self.conn.commit()
 
     def select_all_tasks(self):
@@ -96,16 +92,37 @@ class DataB:
         """
         cur = self.conn.cursor()
         cur.execute("SELECT * FROM tasks")
-    
+
         return cur.fetchall()
-    
-    def select_task_by_priority(self, priority):
+
+    def select_task_by_param(self, param, term):
         """
         Query tasks by priority
         :param priority:
         :return:
         """
         cur = self.conn.cursor()
-        cur.execute("SELECT * FROM tasks WHERE priority=?", (priority,))
-    
+        cur.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
+
         return cur.fetchall()
+
+    def delete_task(self, id):
+        """
+        Delete a task by task id
+        :param id: id of the task
+        :return:
+        """
+        sql = "DELETE FROM tasks WHERE id=?"
+        cur = self.conn.cursor()
+        cur.execute(sql, (id,))
+        self.conn.commit()
+
+    def delete_all_tasks(self):
+        """
+        Delete all rows in the tasks table
+        :return:
+        """
+        sql = "DELETE FROM tasks"
+        cur = self.conn.cursor()
+        cur.execute(sql)
+        self.conn.commit()
