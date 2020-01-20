@@ -10,39 +10,48 @@ VALID_VIDEO = [".mp4", ".avi"]
 VALID_OTHER = [".srt"]
 
 
-def get_files(path: str, file_types: List[str]) -> List[str]:
-    return [p for p in Path(path).rglob("*") if p.suffix in file_types]
+class VideoDir:
+    def __init__(self, path: str):
+        self.path = path
+
+    @staticmethod
+    def _get_files(path: str, file_types: List[str]) -> List[str]:
+        return [p for p in Path(path).rglob("*") if p.suffix in file_types]
+
+    @property
+    def valid_video(self):
+        """checks for a valid video file in a given directory
+        Returns:
+            valid -- a true or false representing if a video file is present
+        """
+        potentials = self.video_files
+
+        if len(potentials) > 0:
+            return True
+        else:
+            return False  # build helpers into class
+
+    @property
+    def video_files(self):
+        return self._get_files(self.path, VALID_VIDEO)
+
+    @property
+    def subtitles(self):
+        return self._get_files(self.path, VALID_OTHER)
 
 
 class AttemptInsert:
     def __init__(self, path: str, api: object):
         print(path)
-        self.path = path
+        self.video = VideoDir(path)
         self.api = api
-        self.valid = self.check_for_video(path)
-        self.status = self.get_status()
+        self.run()
 
-    @staticmethod
-    def check_for_video(path: str):
-        """checks for a valid video file in a given directory
-        
-        Arguments:
-            path {str} -- a path where you would like to    
-        
-        Returns:
-            valid -- a true or false representing if a video file is present
+    @property
+    def status(self):
+        """get the status of a given entry
         """
-        potentials = get_files(path, VALID_VIDEO)
-
-        if len(potentials) > 0:
-            return True
-        else:
-            return False
-
-    def get_status(self):
-        """get the status of a given
-        """
-        task = self.api.select_task_by_param("name", self.path)
+        task = self.api.select_task_by_param("name", self.video.path)
 
         if len(task) == 0:
             print("this video hasn't be started")
@@ -51,8 +60,15 @@ class AttemptInsert:
             return task[0][3]
         else:
             # TODO find something smart to do
+            print(task)
             print("there's a problem we should kill one")
+            return task[0][3]
 
+    def run(self):
+        print("rnn")
+        self.actions[self.status](self.video, self.api)
+
+    @property
     def actions(self):
         return {
             0: self.create_entry,
@@ -61,25 +77,42 @@ class AttemptInsert:
             3: self.delete,
         }
 
-    def create_entry(self, path, api):
+    @staticmethod
+    def create_entry(video, api):
         "if there is no video in sqlite"
-        if self.check_for_video(path):
-            self.api.create_new_task(path)
+        print("creating entry")
+        if video.valid_video:
+            api.create_new_task(video.path)
 
     @staticmethod
-    def convert_video(path, api):
+    def convert_video(video, api):
+        # check if the current step is processing
+        # if complete do something
+
+        # if not
+        print("starting a conversion to mp4")
+        video_path = video.video_files
         # TODO Try to run fmpgg at several settings to convert data
         # "ffmpeg -i $file -c:v libx264 -crf 19 -hide_banner -loglevel panic -preset fast $newFile"
-        print(path)
+        print(video.path)
 
     @staticmethod
-    def rclone(path, api):
+    def rclone(video, api):
+
+        print("starting as sync to s3")
         # "$RCLONE move --include "*.{mp4,srt}" --delete-empty-src-dirs $FILES wasab:wasab"
         pass
 
     @staticmethod
-    def delete(path, api):
-        os.remove(path)
+    def delete(video, api):
+        print("starting a deletion of the file")
+        os.remove(video.path)
+
+    @staticmethod
+    def processing(video, api):
+        print("something is processing")
+        # check for output of process if complete push to next status
+        pass
 
 
 def find_downloads(path, api):
