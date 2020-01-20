@@ -6,7 +6,6 @@ import pytest
 def test_create_connection(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
-    print(db.conn)
     assert os.path.exists(path)
 
 
@@ -32,21 +31,21 @@ def test_create_task(test_data_dir):
     db.commit_changes()
 
     tasks = db.select_all_tasks()
-    print(tasks)
+    assert len(tasks) == 4
 
 
 def test_select_all_tasks(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
     tasks = db.select_all_tasks()
-    print(f"all tasks : {tasks}")
+    assert len(tasks) == 4
 
 
 def test_select_task_by_param(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
     tasks = db.select_task_by_param("priority", 0)
-    print(f"tasks by priority {tasks}")
+    assert len(tasks) == 3
 
 
 def test_update_task(test_data_dir):
@@ -65,7 +64,10 @@ def test_update_param(test_data_dir):
 def test_delete_task(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
-    db.delete_task(0)
+    cur_len = len(db.select_all_tasks())
+    db.delete_task(1)
+    new_len = len(db.select_all_tasks())
+    assert (cur_len - new_len) == 1
 
 
 def test_delete_all_task(test_data_dir):
