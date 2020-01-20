@@ -39,7 +39,7 @@ class DataB:
         # datetime object containing current date and time
         return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
-    def commit_changes(self):
+    def commit(self):
         self.conn.commit()
 
     def create_new_table(self):
@@ -74,6 +74,7 @@ class DataB:
                 VALUES(?,?,?,?,?) """
         cur = self.conn.cursor()
         cur.execute(sql, task)
+        self.commit()
         return cur.lastrowid
 
     def update_task(self, task):

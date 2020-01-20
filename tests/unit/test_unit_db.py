@@ -41,7 +41,6 @@ def test_create_new_task(test_data_dir):
     db.create_new_task("test2")
     db.create_new_task("test3")
     db.create_new_task("test4")
-    db.commit_changes()
 
     tasks = db.select_all_tasks()
     assert len(tasks) == 4
