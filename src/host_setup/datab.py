@@ -38,6 +38,10 @@ class DataB:
     def get_start_time(self):
         # datetime object containing current date and time
         return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+    
+    @property
+    def cursor():
+        return self.conn.cursor()
 
     def commit(self):
         self.conn.commit()
@@ -47,8 +51,7 @@ class DataB:
         :return:
         """
         try:
-            c = self.conn.cursor()
-            c.execute(DATAB_DEF)
+            self.cursor.execute(DATAB_DEF)
         except Error as e:
             print(e)
 
@@ -72,8 +75,7 @@ class DataB:
 
         sql = """ INSERT INTO tasks(name,priority,status_id,begin_date,end_date)
                 VALUES(?,?,?,?,?) """
-        cur = self.conn.cursor()
-        cur.execute(sql, task)
+        self.cursor.execute(sql, task)
         self.commit()
         return cur.lastrowid
 
@@ -89,8 +91,7 @@ class DataB:
                     begin_date = ? ,
                     end_date = ?
                 WHERE id = ?"""
-        cur = self.conn.cursor()
-        cur.execute(sql, task)
+        self.cursor.execute(sql, task)
         self.conn.commit()
 
     def update_task_param(self, param, val, task_id):
@@ -101,8 +102,7 @@ class DataB:
         sql = f""" UPDATE tasks
                 SET {param} = ?
                 WHERE id = ?"""
-        cur = self.conn.cursor()
-        cur.execute(sql, (val, task_id))
+        self.cursor.execute(sql, (val, task_id))
         self.conn.commit()
 
     def select_all_tasks(self):
@@ -110,8 +110,7 @@ class DataB:
         Query all rows in the tasks table
         :return:
         """
-        cur = self.conn.cursor()
-        cur.execute("SELECT * FROM tasks")
+        self.cursor.execute("SELECT * FROM tasks")
 
         return cur.fetchall()
 
@@ -121,10 +120,12 @@ class DataB:
         :param priority:
         :return:
         """
-        cur = self.conn.cursor()
-        cur.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
+        self.cursor.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
 
         return cur.fetchall()
+
+    def get_param_status(self, param, term):
+
 
     def delete_task(self, id):
         """
@@ -133,8 +134,7 @@ class DataB:
         :return:
         """
         sql = "DELETE FROM tasks WHERE id=?"
-        cur = self.conn.cursor()
-        cur.execute(sql, (id,))
+        self.cursor.execute(sql, (id,))
         self.conn.commit()
 
     def delete_all_tasks(self):
@@ -143,8 +143,7 @@ class DataB:
         :return:
         """
         sql = "DELETE FROM tasks"
-        cur = self.conn.cursor()
-        cur.execute(sql)
+        self.cursor.execute(sql)
         self.conn.commit()
 
     def delete_database(self):
