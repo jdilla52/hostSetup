@@ -40,7 +40,33 @@ class VideoDir:
         return self._get_files(self.path, VALID_OTHER)
 
 
-class AttemptInsert:
+class ScanDir:
+    def __init__(self, path: str, api: object):
+        self.path = Path
+        self.api = api
+
+    # def scan_dir(self):
+    #     # perform these in a lazy or non-blocking manner
+    #     for dir in self.path:
+    #         Process(dir)
+
+
+# def task_state_manager(func):
+#     def run_task():
+def state_manager(api):
+    def wrap(f):
+        def action_f(*args):
+            print("Inside wrapped_f()")
+            print("Decorator arguments:", api)
+            f(*args)
+            print("After f(*args)")
+
+        return action_f
+
+    return wrap
+
+
+class Process:
     def __init__(self, path: str, api: object):
         print(path)
         self.video = VideoDir(path)
@@ -51,7 +77,7 @@ class AttemptInsert:
     def status(self):
         """get the status of a given entry
         """
-        task = self.api.select_task_by_param("name", self.video.path)
+        task = self.api.select_task_by_name("name", self.video.path)
 
         if len(task) == 0:
             print("this video hasn't be started")
@@ -64,13 +90,14 @@ class AttemptInsert:
             print("there's a problem we should kill one")
             return task[0][3]
 
-    def run(self):
+    def run_process(self):
         print("rnn")
         self.actions[self.status](self.video, self.api)
 
     @property
     def actions(self):
         return {
+            -1: self.video_busy,
             0: self.create_entry,
             1: self.convert_video,
             2: self.rclone,
@@ -78,8 +105,12 @@ class AttemptInsert:
         }
 
     @staticmethod
+    def video_busy(video, api):
+        return None
+
+    @staticmethod
     def create_entry(video, api):
-        "if there is no video in sqlite"
+        """if there is no video in sqlite"""
         print("creating entry")
         if video.valid_video:
             api.create_new_task(video.path)

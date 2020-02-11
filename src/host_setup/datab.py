@@ -9,6 +9,7 @@ DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     name text NOT NULL,
                                     priority integer,
                                     status_id integer NOT NULL,
+                                    processing bool NOT NULL,
                                     begin_date text NOT NULL,
                                     end_date text NOT NULL
                                 );"""
@@ -38,9 +39,9 @@ class DataB:
     def get_start_time(self):
         # datetime object containing current date and time
         return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    
+
     @property
-    def cursor():
+    def cursor(self):
         return self.conn.cursor()
 
     def commit(self):
@@ -77,7 +78,7 @@ class DataB:
                 VALUES(?,?,?,?,?) """
         self.cursor.execute(sql, task)
         self.commit()
-        return cur.lastrowid
+        return self.cursor.lastrowid
 
     def update_task(self, task):
         """
@@ -88,6 +89,7 @@ class DataB:
                 SET name = ? ,
                     priority = ? ,
                     status_id = ? ,
+                    processing = ? ,
                     begin_date = ? ,
                     end_date = ?
                 WHERE id = ?"""
@@ -112,7 +114,7 @@ class DataB:
         """
         self.cursor.execute("SELECT * FROM tasks")
 
-        return cur.fetchall()
+        return self.cursor.fetchall()
 
     def select_task_by_param(self, param, term):
         """
@@ -124,8 +126,33 @@ class DataB:
 
         return cur.fetchall()
 
-    def get_param_status(self, param, term):
+    def get_task_status(self, name):
+        task = self.select_all_tasks("name", name)
 
+        if len(task) == 0:
+            print("this video hasn't be started")
+            return 0
+        elif len(task) == 1:
+            if task[0][4]:
+                return -1
+
+            else:
+                return task[0][3]
+        else:
+            # TODO find something smart to do
+            print(task)
+            print("there's a problem we should kill one")
+            return task[0][3]
+
+    def select_task_status(self, param, term):
+        """
+        Query tasks 
+        :param priority:
+        :return:
+        """
+        self.cursor.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
+
+        return self.cursor.fetchall()
 
     def delete_task(self, id):
         """
