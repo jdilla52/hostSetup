@@ -11,11 +11,12 @@ def test_create_connection(test_data_dir):
 
 def test_state_manager(test_data_dir):
     path = os.path.join(test_data_dir, "downloads/movie2")
-    db_path = os.path.join(test_data_dir, "test.db")
+    db_path = os.path.join(test_data_dir, "test3.db")
     db = DataB(db_path)
     db.create_new_table()
+    db.create_new_task("hello")
 
-    @state_manager(db)
+    @state_manager(db, "hello")
     def dumb_def(hello):
         print(hello)
         print()

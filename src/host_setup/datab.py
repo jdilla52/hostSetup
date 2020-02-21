@@ -9,7 +9,7 @@ DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     name text NOT NULL,
                                     priority integer,
                                     status integer NOT NULL,
-                                    processing bool NOT NULL,
+                                    processing int NOT NULL,
                                     begin_date text NOT NULL,
                                     end_date text NOT NULL
                                 );"""
@@ -56,7 +56,7 @@ class DataB:
         except Error as e:
             print(e)
 
-    def create_new_task(self, name, priority=0, status=0, processing=False):
+    def create_new_task(self, name, priority=0, status=0, processing=0):
         """
         Create a new task for tracking. this is a helper around _create_task
         :param name : str

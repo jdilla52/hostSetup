@@ -71,7 +71,7 @@ class Process:
         print(path)
         self.video = VideoDir(path)
         self.api = api
-        self.run()
+        self.run_process()
 
     @property
     def status(self):

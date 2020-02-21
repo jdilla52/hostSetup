@@ -1,18 +1,25 @@
 from host_setup.actions import VideoDir
 
-
-def state_manager(api):
+def state_manager(api, name):
     def wrap(f):
         def action_f(*args):
-            print("Inside wrapped_f()")
-            print("Decorator arguments:", api)
-            f(*args)
-            print("After f(*args)")
+            api.update_task_by_name("processing", 1, name)
+
+            try:
+                print("Inside wrapped_f()")
+                print("Decorator arguments:", api)
+                f(*args)
+                print("After f(*args)")
+                api.update_task_by_name("processing", 0, name)
+            except:
+                
+                api.update_task_by_name("processing", -1, name)
+                raise
+
 
         return action_f
 
     return wrap
-
 
 class Process:
     def __init__(self, path: str, api: object):
@@ -25,18 +32,7 @@ class Process:
     def status(self):
         """get the status of a given entry
         """
-        task = self.api.select_task_by_name("name", self.video.path)
-
-        if len(task) == 0:
-            print("this video hasn't be started")
-            return 0
-        elif len(task) == 1:
-            return self.api.get_task_status(self.video.path)
-        else:
-            # TODO find something smart to do
-            print(task)
-            print("there's a problem we should kill one")
-            raise IndexError("there's an issue")
+        return self.api.get_task_status(self.video.path)
 
     def run_process(self):
         print("rnn")

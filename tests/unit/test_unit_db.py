@@ -71,7 +71,7 @@ def test_select_task_by_name(test_data_dir):
 def test_update_task(test_data_dir):
     path = os.path.join(test_data_dir, "output/db.db")
     db = DataB(path)
-    task_data = ("bbb", 0, 2, False, "2015-01-01", "2015-01-02", 0)
+    task_data = ("bbb", 0, 2, 0, "2015-01-01", "2015-01-02", 0)
     db.update_task(task_data)
 
 
