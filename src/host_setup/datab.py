@@ -8,7 +8,7 @@ DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     id integer PRIMARY KEY,
                                     name text NOT NULL,
                                     priority integer,
-                                    status_id integer NOT NULL,
+                                    status integer NOT NULL,
                                     processing bool NOT NULL,
                                     begin_date text NOT NULL,
                                     end_date text NOT NULL
@@ -41,7 +41,7 @@ class DataB:
         return datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     @property
-    def cursor(self):
+    def cur(self):
         return self.conn.cursor()
 
     def commit(self):
@@ -52,19 +52,19 @@ class DataB:
         :return:
         """
         try:
-            self.cursor.execute(DATAB_DEF)
+            self.cur.execute(DATAB_DEF)
         except Error as e:
             print(e)
 
-    def create_new_task(self, name, priority=0, status_id=0):
+    def create_new_task(self, name, priority=0, status=0, processing=False):
         """
         Create a new task for tracking. this is a helper around _create_task
         :param name : str
         :param priority : int
-        :param status_id : int
+        :param status : int
         :return: id : int
         """
-        task = (name, priority, status_id, self.get_start_time, "-")
+        task = (name, priority, status, processing, self.get_start_time, "-")
         self.create_task(task)
 
     def create_task(self, task):
@@ -74,11 +74,11 @@ class DataB:
         :return:
         """
 
-        sql = """ INSERT INTO tasks(name,priority,status_id,begin_date,end_date)
-                VALUES(?,?,?,?,?) """
-        self.cursor.execute(sql, task)
+        sql = """ INSERT INTO tasks(name,priority,status,processing,begin_date,end_date)
+                VALUES(?,?,?,?,?,?) """
+        self.cur.execute(sql, task)
         self.commit()
-        return self.cursor.lastrowid
+        return self.cur.lastrowid
 
     def update_task(self, task):
         """
@@ -88,12 +88,23 @@ class DataB:
         sql = """ UPDATE tasks
                 SET name = ? ,
                     priority = ? ,
-                    status_id = ? ,
+                    status = ? ,
                     processing = ? ,
                     begin_date = ? ,
                     end_date = ?
                 WHERE id = ?"""
-        self.cursor.execute(sql, task)
+        self.cur.execute(sql, task)
+        self.conn.commit()
+
+    def update_task_by_name(self, param, val, name):
+        """
+        update priority, begin_date, and end date of a task
+        :param task:
+        """
+        sql = f""" UPDATE tasks
+                SET {param} = ?
+                WHERE name = ?"""
+        self.cur.execute(sql, (val, name))
         self.conn.commit()
 
     def update_task_param(self, param, val, task_id):
@@ -104,7 +115,7 @@ class DataB:
         sql = f""" UPDATE tasks
                 SET {param} = ?
                 WHERE id = ?"""
-        self.cursor.execute(sql, (val, task_id))
+        self.cur.execute(sql, (val, task_id))
         self.conn.commit()
 
     def select_all_tasks(self):
@@ -112,9 +123,8 @@ class DataB:
         Query all rows in the tasks table
         :return:
         """
-        self.cursor.execute("SELECT * FROM tasks")
 
-        return self.cursor.fetchall()
+        return self.cur.execute("SELECT * FROM tasks").fetchall()
 
     def select_task_by_param(self, param, term):
         """
@@ -122,22 +132,18 @@ class DataB:
         :param priority:
         :return:
         """
-        self.cursor.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
-
-        return cur.fetchall()
+        return self.cur.execute(
+            f"SELECT * FROM tasks WHERE {param}=?", (term,)
+        ).fetchall()
 
     def get_task_status(self, name):
-        task = self.select_all_tasks("name", name)
+        task = self.select_task_by_param("name", name)
 
         if len(task) == 0:
             print("this video hasn't be started")
             return 0
         elif len(task) == 1:
-            if task[0][4]:
-                return -1
-
-            else:
-                return task[0][3]
+            return task[0][3]
         else:
             # TODO find something smart to do
             print(task)
@@ -150,9 +156,9 @@ class DataB:
         :param priority:
         :return:
         """
-        self.cursor.execute(f"SELECT * FROM tasks WHERE {param}=?", (term,))
-
-        return self.cursor.fetchall()
+        return self.cur.execute(
+            f"SELECT * FROM tasks WHERE {param}=?", (term,)
+        ).fetchall()
 
     def delete_task(self, id):
         """
@@ -161,7 +167,7 @@ class DataB:
         :return:
         """
         sql = "DELETE FROM tasks WHERE id=?"
-        self.cursor.execute(sql, (id,))
+        self.cur.execute(sql, (id,))
         self.conn.commit()
 
     def delete_all_tasks(self):
@@ -170,7 +176,7 @@ class DataB:
         :return:
         """
         sql = "DELETE FROM tasks"
-        self.cursor.execute(sql)
+        self.cur.execute(sql)
         self.conn.commit()
 
     def delete_database(self):
