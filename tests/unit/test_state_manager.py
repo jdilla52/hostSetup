@@ -1,6 +1,6 @@
 import os
 from host_setup.datab import DataB
-from host_setup.process import state_manager
+from host_setup.process import state_manager, logger
 import pytest
 
 
@@ -22,4 +22,20 @@ def test_state_manager(test_data_dir):
         print()
 
     dumb_def("sdfsdf")
-    # db.delete_database()
+    db.delete_database()
+
+
+def test_logging(test_data_dir):
+    path = os.path.join(test_data_dir, "downloads/movie2")
+    db_path = os.path.join(test_data_dir, "test3.db")
+    db = DataB(db_path)
+    db.create_new_table()
+    db.create_new_task("hello")
+
+    @logger
+    def dumb_def(hello):
+        print(hello)
+        print()
+
+    dumb_def("sdfsdf")
+    db.delete_database()
