@@ -1,4 +1,4 @@
-import os 
+import os
 from host_setup.actions import find_downloads
 import pytest
 

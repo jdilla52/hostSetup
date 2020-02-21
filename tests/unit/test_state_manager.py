@@ -1,6 +1,6 @@
 import os
 from host_setup.datab import DataB
-from host_setup.actions import state_manager
+from host_setup.process import state_manager
 import pytest
 
 
@@ -9,7 +9,7 @@ def test_create_connection(test_data_dir):
     db = DataB(path)
 
 
-def test_attempt_insert(test_data_dir):
+def test_state_manager(test_data_dir):
     path = os.path.join(test_data_dir, "downloads/movie2")
     db_path = os.path.join(test_data_dir, "test.db")
     db = DataB(db_path)
