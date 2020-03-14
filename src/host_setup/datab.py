@@ -45,6 +45,9 @@ class DataB:
     def cur(self):
         return self.conn.cursor()
 
+    def close(self):
+        self.conn.close()
+
     def commit(self):
         self.conn.commit()
 
@@ -185,5 +188,5 @@ class DataB:
         Delete the base .db file
         :return:
         """
-        self.conn.close()
+        self.close()
         os.remove(self.path)
