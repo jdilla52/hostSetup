@@ -42,7 +42,7 @@ class Process:
         """if there is no video in sqlite"""
         if video.valid_video:
             print("creating entry")
-            api.create_new_task(video.name)
+            api.create_new_task(video.name, video.path)
 
     @staticmethod
     @state_manager

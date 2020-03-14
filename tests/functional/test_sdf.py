@@ -10,3 +10,5 @@ def test_find_downloads(test_data_dir):
 
     scan = ScanDir(path, api=db_path)
     assert test_data_dir
+
+    scan.api.delete_database()

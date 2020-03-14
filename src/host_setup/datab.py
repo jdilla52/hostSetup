@@ -7,6 +7,7 @@ from datetime import datetime
 DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     id integer PRIMARY KEY,
                                     name text NOT NULL,
+                                    path text NOT NULL,
                                     priority integer,
                                     status integer NOT NULL,
                                     processing int NOT NULL,
@@ -56,7 +57,7 @@ class DataB:
         except Error as e:
             print(e)
 
-    def create_new_task(self, name, priority=0, status=0, processing=0):
+    def create_new_task(self, name, path, priority=0, status=0, processing=0):
         """
         Create a new task for tracking. this is a helper around _create_task
         :param name : str
@@ -64,7 +65,7 @@ class DataB:
         :param status : int
         :return: id : int
         """
-        task = (name, priority, status, processing, self.get_start_time, "-")
+        task = (name, path, priority, status, processing, self.get_start_time, "-")
         self.create_task(task)
 
     def create_task(self, task):
@@ -74,8 +75,8 @@ class DataB:
         :return:
         """
 
-        sql = """ INSERT INTO tasks(name,priority,status,processing,begin_date,end_date)
-                VALUES(?,?,?,?,?,?) """
+        sql = """ INSERT INTO tasks(name,path,priority,status,processing,begin_date,end_date)
+                VALUES(?,?,?,?,?,?,?) """
         self.cur.execute(sql, task)
         self.commit()
         return self.cur.lastrowid
@@ -87,6 +88,7 @@ class DataB:
         """
         sql = """ UPDATE tasks
                 SET name = ? ,
+                    path = ? ,
                     priority = ? ,
                     status = ? ,
                     processing = ? ,
@@ -138,17 +140,16 @@ class DataB:
 
     def get_task_status(self, name):
         task = self.select_task_by_param("name", name)
-
         if len(task) == 0:
             print("this video hasn't be started")
             return 0
         elif len(task) == 1:
-            return task[0][3]
+            return task[0][4]
         else:
             # TODO find something smart to do
             print(task)
             print("there's a problem we should kill one")
-            return task[0][3]
+            return task[0][4]
 
     def select_task_status(self, param, term):
         """
