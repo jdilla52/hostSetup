@@ -1,29 +1,10 @@
-from host_setup.actions import VideoDir
+from host_setup.video_dir import VideoDir
+from host_setup.decorators import state_manager, logger
+import os
 
-def state_manager(api, name):
-    def wrap(f):
-        def action_f(*args):
-            api.update_task_by_name("processing", 1, name)
-
-            try:
-                print("Inside wrapped_f()")
-                print("Decorator arguments:", api)
-                f(*args)
-                print("After f(*args)")
-                api.update_task_by_name("processing", 0, name)
-            except:
-                
-                api.update_task_by_name("processing", -1, name)
-                raise
-
-
-        return action_f
-
-    return wrap
 
 class Process:
     def __init__(self, path: str, api: object):
-        print(path)
         self.video = VideoDir(path)
         self.api = api
         self.run_process()
@@ -32,7 +13,9 @@ class Process:
     def status(self):
         """get the status of a given entry
         """
-        return self.api.get_task_status(self.video.path)
+        status = self.api.get_task_status(self.video.name)
+        print(status)
+        return status
 
     def run_process(self):
         print("rnn")
@@ -53,13 +36,16 @@ class Process:
         return None
 
     @staticmethod
+    @state_manager
+    # @logger
     def create_entry(video, api):
         """if there is no video in sqlite"""
-        print("creating entry")
         if video.valid_video:
-            api.create_new_task(video.path)
+            print("creating entry")
+            api.create_new_task(video.name)
 
     @staticmethod
+    @state_manager
     def convert_video(video, api):
         # check if the current step is processing
         # if complete do something
@@ -70,10 +56,10 @@ class Process:
         # TODO Try to run fmpgg at several settings to convert data
         # "ffmpeg -i $file -c:v libx264 -crf 19 -hide_banner -loglevel panic -preset fast $newFile"
         print(video.path)
+        return None
 
     @staticmethod
     def rclone(video, api):
-
         print("starting as sync to s3")
         # "$RCLONE move --include "*.{mp4,srt}" --delete-empty-src-dirs $FILES wasab:wasab"
         pass
@@ -90,10 +76,10 @@ class Process:
         pass
 
 
-def find_downloads(path, api):
-    # Set the directory you want to start from
+# def find_downloads(path, api):
+#     # Set the directory you want to start from
 
-    for sub_dir in os.listdir(path):
-        if sub_dir not in EXCLUDE:
-            given_dir = os.path.join(path, sub_dir)
-            AttemptInsert(given_dir, api)
+#     for sub_dir in os.listdir(path):
+#         if sub_dir not in EXCLUDE:
+#             given_dir = os.path.join(path, sub_dir)
+#             AttemptInsert(given_dir, api)
