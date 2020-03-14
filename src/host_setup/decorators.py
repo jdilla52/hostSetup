@@ -9,21 +9,23 @@ from functools import wraps
 logging.basicConfig(level=logging.INFO)
 
 
-def state_manager(api, name):
-    def wrap(f):
-        @wraps(f)
-        def action_f(*args):
-            api.update_task_by_name("processing", 1, name)
-            try:
-                f(*args)
-                api.update_task_by_name("processing", 0, name)
-            except:
-                api.update_task_by_name("processing", -1, name)
-                raise
+def state_manager(f):
+    @wraps(f)
+    def action_f(video, api):
+        # get the current status of the task at hand
+        status = api.get_task_status(video.name)
+        print(status)
+        # set the current task to busy
+        api.update_task_by_name("processing", 1, video.name)
 
-        return action_f
+        try:
+            f(video, api)
+            api.update_task_by_name("processing", 0, video.name)
+            api.update_task_by_name("status", status + 1, video.name)
+        except:
+            api.update_task_by_name("processing", -1, video.name)
 
-    return wrap
+    return action_f
 
 
 def logger(f):
