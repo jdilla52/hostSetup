@@ -1,25 +1,24 @@
 import os
-from typing import Dict
+from typing import Dict, Optional
 from dotenv import load_dotenv, find_dotenv
 
 
-class Global:
-    def __init__(self, env: str = None, override: Dict = None):
+class Env:
+    def __init__(self, env: Optional[str] = None, params: Optional[Dict] = None):
         # build in overrides for testing
         self.env = env
-        self.override = override
+        self.params = params
         self.load_global_env()
 
     def load_global_env(self):
         switcher = {
-            (False, False): self.auto_load,
-            (False, True): self.load_env_file,
-            (True, False): self.load_params,
-            (True, True): self.load_params,
+            (True, True): self.auto_load,
+            (True, False): self.load_env_file,
+            (False, True): self.load_params,
+            (False, False): self.load_params,
         }
 
         f = switcher.get(self.check_vals)
-
         try:
             f()
         except:
@@ -27,21 +26,21 @@ class Global:
 
     @property
     def check_vals(self):
-        return (self.override is None, self.env is None)
+        return self.params is None, self.env is None
 
     def auto_load(self):
-        auto = find_dotenv()
-        if auto is not None:
-            load_dotenv(auto)
-        else:
-            raise ValueError("couldn't find the env file")
+        print("auto loading -------")
+        load_dotenv(find_dotenv(raise_error_if_not_found=True, usecwd=True))
 
     def load_env_file(self):
-        if not load_dotenv(self.env):
+
+        if os.path.isfile(self.env):
+            load_dotenv(self.env)
+        else:
             raise ValueError(
                 f"couldn't load the file, maybe it's here: {find_dotenv()}"
             )
 
     def load_params(self):
-        for key, val in self.override.items():
+        for key, val in self.params.items():
             os.environ[key] = str(val)
