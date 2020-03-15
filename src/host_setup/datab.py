@@ -2,7 +2,7 @@ import sqlite3
 from sqlite3 import Error
 import os
 from datetime import datetime
-
+from host_setup.env import Env
 
 DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                     id integer PRIMARY KEY,
@@ -16,10 +16,27 @@ DATAB_DEF = """CREATE TABLE IF NOT EXISTS tasks (
                                 );"""
 
 
+def check_db(var):
+    if var is not None:
+        return var
+    else:
+        try:
+            return os.environ["PLEXDB"]
+        except:
+            raise EnvironmentError("the db var isn't set")
+
+
 class DataB:
-    def __init__(self, db_file):
-        self.path = db_file
-        self.conn = self.create_connection(db_file)
+    def __init__(self, db_path=None):
+        self.path = check_db(db_path)
+        self.conn = self.create_connection(self.path)
+        self.create_new_table()
+
+    def __repr__(self):
+        return f"\n{self.__class__.__name__} \n path: {self.path} \n conn: {self.conn} \n tasks: {self.select_all_tasks()}"
+
+    def __str__(self):
+        return f"path: {self.path} \n conn: {self.conn} \n tasks: {self.select_all_tasks()}"
 
     @staticmethod
     def create_connection(db_file):
@@ -141,10 +158,24 @@ class DataB:
             f"SELECT * FROM tasks WHERE {param}=?", (term,)
         ).fetchall()
 
+    def get_task_param(self, param, name):
+        try:
+            result = self.cur.execute(
+                f"SELECT {param} FROM tasks WHERE name=?", (name,)
+            ).fetchall()
+            if len(result) == 0:
+                if param == "status" or param == "processing":
+                    return 0
+                else:
+                    return None
+            else:
+                return result[0][0]
+        except:
+            return None
+
     def get_task_status(self, name):
         task = self.select_task_by_param("name", name)
         if len(task) == 0:
-            print("this video hasn't be started")
             return 0
         elif len(task) == 1:
             return task[0][4]

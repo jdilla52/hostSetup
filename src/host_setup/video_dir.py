@@ -13,9 +13,16 @@ class VideoDir:
         self.path = path
         self.name = os.path.basename(path)
 
+    def __repr__(self):
+        return f"\n{self.__class__.__name__} \n path: {self.path} \n name: {self.name}"
+
     @staticmethod
     def _get_files(path: str, file_types: List[str]) -> List[str]:
         return [p for p in Path(path).rglob("*") if p.suffix in file_types]
+
+    @property
+    def r_path(self):
+        return str(self.path)
 
     @property
     def valid_video(self):
