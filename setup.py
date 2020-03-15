@@ -14,7 +14,7 @@ with io.open("src/host_setup/__init__.py", "rt", encoding="utf8") as f:
 setup(
     name="host_setup",
     version=version,
-    author="Jacques Perrault",
+    author="shaddy52",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     install_requires=requirements,
