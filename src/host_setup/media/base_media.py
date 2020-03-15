@@ -3,7 +3,7 @@ from typing import List
 from pathlib import Path
 from glob import glob
 import os
-from dataclasses import dataclass
+from host_setup.media.media_target import MediaTarget
 
 class BaseMedia(ABC):
     def __init__(self, path:str, settings:MediaTarget):
