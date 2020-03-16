@@ -7,14 +7,27 @@ from host_setup.media.media_target import MediaTarget
 
 
 class BaseMedia(ABC):
-    def __init__(self, data: MediaTarget):
-        self.path = data.path
-        self.target_typ = data.target
-        self.convert_typs = data.to_convert
-        self.other_typs = data.valid_other
+    def __init__(
+        self,
+        typ: str,
+        path: str,
+        target_typ: str,
+        convert_typs: List[str],
+        other_typs: List[str] = None,
+    ):
+        self.typ = typ
+        self.path = path
+        self.target_typ = target_typ
+        self.convert_typs = convert_typs
+        self.other_typs = other_typs
 
     def __repr__(self):
-        return f"\n{self.__class__.__name__} \n  name: {self.name} \n path: {self.path} \n target_typ : {self.target_typ} \n convert_typs : {self.convert_typs} \n other_typs : {self.other_typs}"
+        return f"""{self.__class__.__name__}
+         name: {self.name}  
+         path: {self.path}  
+         target_typ : {self.target_typ}  
+         convert_typs : {self.convert_typs}  
+         other_typs : {self.other_typs}"""
 
     @abstractmethod
     def process_media(self):
