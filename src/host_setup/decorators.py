@@ -24,7 +24,7 @@ def state_manager(f):
             api.update_task_by_name("status", status + 1, video.name)
         except:
             print("somethings wrong")
-            api.update_task_by_name("processing", proc_state-1, video.name)
+            api.update_task_by_name("processing", proc_state - 1, video.name)
             print(proc_state)
 
     return action_f

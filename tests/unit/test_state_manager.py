@@ -1,7 +1,7 @@
 import os
 from host_setup.datab import DataB
+from host_setup.media.tv import TV
 from host_setup.process import state_manager, logger
-from host_setup.video_dir import VideoDir
 import pytest
 
 
@@ -15,9 +15,11 @@ def test_state_manager(test_data_dir):
     @state_manager
     def dumb_def(video, api):
         print("hello")
-        print()
 
-    j = VideoDir(path)
+    j = TV("sdf",
+        path,
+        ".mp4",
+        ["s",""])
     dumb_def(j, db)
 
     
