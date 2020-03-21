@@ -8,11 +8,10 @@ import pytest
 
 def test_find_downloads(test_data_dir):
     path = os.path.join(test_data_dir, "input.toml")
-    db_path = os.path.join(test_data_dir, "output/functional_db.db")
 
     # create a new table
     Env()
 
     print(os.environ["PLEXDB"])
     scan = Runner(Settings(path))
-    scan.api.delete_database()
+    # scan.api.delete_database()

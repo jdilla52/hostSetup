@@ -1,6 +1,6 @@
 [input1]
 typ = "Video"
 path = "./tests/data/downloads"
-target_typ = "mp4"
-convert_typs = ["avi", "mkv"]
-other_typs = ["srt]
+target_typ = ".mp4"
+convert_typs = [".avi", ".mkv"]
+other_typs = [".srt]

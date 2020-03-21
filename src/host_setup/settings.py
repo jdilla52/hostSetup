@@ -16,6 +16,6 @@ class Settings:
         """
 
         call_stack = []
-        for key, val in self.settings.items():
+        for val in self.settings.values():
             call_stack.append(MediaTarget(**val))
         return call_stack

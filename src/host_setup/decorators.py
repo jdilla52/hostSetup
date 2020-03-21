@@ -5,10 +5,6 @@ import time
 from functools import wraps
 
 
-# logging.basicConfig(level=logging.INFO, file='sample.log')
-logging.basicConfig(level=logging.INFO)
-
-
 def state_manager(f):
     @wraps(f)
     def action_f(video, api):
@@ -22,10 +18,12 @@ def state_manager(f):
             f(video, api)
             api.update_task_by_name("processing", 0, video.name)
             api.update_task_by_name("status", status + 1, video.name)
+
         except:
             print("somethings wrong")
             api.update_task_by_name("processing", proc_state - 1, video.name)
             print(proc_state)
+            raise
 
     return action_f
 

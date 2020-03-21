@@ -1,4 +1,5 @@
 import os
+import logging
 from typing import Dict, Optional
 from dotenv import load_dotenv, find_dotenv
 
@@ -9,6 +10,11 @@ class Env:
         self.env = env
         self.params = params
         self.load_global_env()
+        self.set_logging() # if there are other globals based on the env we need to set we can wrap this
+
+    def set_logging(self):
+        print(os.environ["LOGGING"])
+        logging.basicConfig(level=logging.INFO, file=os.environ["LOGGING"])
 
     def load_global_env(self):
         switcher = {
